@@ -372,14 +372,27 @@ export default {
     };
 
     const getClassesForSlot = (day, timeSlot) => {
+      const slotHour = parseInt(timeSlot.split(':')[0]);
+      const slotMin = parseInt(timeSlot.split(':')[1]);
+
+      const slotValue = slotHour + slotMin / 60;
+
       return horarioData.value.filter(clase => {
         const timeRange = clase[day];
         if (!timeRange) return false;
+
+        const [start, end] = timeRange.split('-');
+        const [startH, startM] = start.split(':').map(Number);
+        const [endH, endM] = end.split(':').map(Number);
+
+        const startValue = startH + startM / 60;
+        const endValue = endH + endM / 60;
+
         
-        const [start] = timeRange.split('-');
-        return start === timeSlot;
+        return slotValue >= startValue && slotValue < endValue;
       });
     };
+
 
     const getClassStyle = (clase, day) => {
       const timeRange = clase[day];
