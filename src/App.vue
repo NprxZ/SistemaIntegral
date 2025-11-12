@@ -5,12 +5,12 @@
       @logout="handleLogout" 
       :studentName="studentData?.persona || studentData?.nombre" 
     />
-    <router-view />
+    <router-view :key="$route.fullPath" />
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, onMounted, watchEffect } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import Navbar from './components/Navbar.vue';
 
@@ -23,37 +23,59 @@ export default {
     const router = useRouter();
     const route = useRoute();
     const studentData = ref(null);
-    const currentPath = ref(route.path);
+    const showNavbar = ref(false);
     
-    // Watch para actualizar la ruta actual
-    watch(() => route.path, (newPath) => {
-      currentPath.value = newPath;
-    });
+    // Función para verificar autenticación
+    const checkAuth = () => {
+      const token = localStorage.getItem('jwt_token');
+      const isLogin = route.path === '/login';
+      showNavbar.value = !!token && !isLogin;
+      
+      console.log('🔍 CheckAuth:', {
+        token: token ? 'exists' : 'none',
+        path: route.path,
+        isLogin,
+        showNavbar: showNavbar.value
+      });
+    };
     
-    const isAuthenticated = computed(() => {
-      return !!localStorage.getItem('jwt_token');
-    });
-
-    const isLoginRoute = computed(() => {
-      return currentPath.value === '/login';
-    });
-
-    const showNavbar = computed(() => {
-      return isAuthenticated.value && !isLoginRoute.value;
-    });
+    // Cargar datos del estudiante
+    const loadStudentData = () => {
+      const savedData = localStorage.getItem('student_data');
+      if (savedData) {
+        try {
+          studentData.value = JSON.parse(savedData);
+        } catch (e) {
+          console.error('Error parsing student data:', e);
+        }
+      }
+    };
     
     const handleLogout = () => {
       localStorage.removeItem('jwt_token');
       localStorage.removeItem('student_data');
       studentData.value = null;
+      showNavbar.value = false;
       router.push('/login');
     };
     
+    // Ejecutar al montar
     onMounted(() => {
-      const savedData = localStorage.getItem('student_data');
-      if (savedData) {
-        studentData.value = JSON.parse(savedData);
-      }
+      loadStudentData();
+      checkAuth();
+    });
+    
+    // Vigilar cambios en la ruta
+    watchEffect(() => {
+      // Esto se ejecutará cada vez que route.path cambie
+      route.path;
+      checkAuth();
+    });
+    
+    // También vigilar cambios en localStorage (para cuando se hace login)
+    window.addEventListener('storage', () => {
+      loadStudentData();
+      checkAuth();
     });
     
     return {
@@ -86,3 +108,4 @@ body {
   min-height: 100vh;
 }
 </style>
+

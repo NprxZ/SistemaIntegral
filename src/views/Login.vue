@@ -3,7 +3,7 @@
     <!-- Imagen de fondo -->
     <div class="background-image">
       <!-- Aquí puedes poner tu imagen de collage -->
-      <!-- <img src="/ruta-a-tu-imagen-collage.jpg" alt="Background" class="bg-img" /> -->
+      <img src="/tras.webp" alt="Background" class="bg-img" /> 
       
       <!-- Overlay con degradado -->
       <div class="overlay"></div>
@@ -262,9 +262,9 @@ export default {
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg, 
-    rgba(10, 95, 56, 0.95) 0%, 
-    rgba(13, 125, 77, 0.92) 50%, 
-    rgba(10, 95, 56, 0.95) 100%
+    rgba(10, 95, 56, 0.55) 0%, 
+    rgba(13, 125, 77, 0.52) 50%, 
+    rgba(10, 95, 56, 0.55) 100%
   );
   backdrop-filter: blur(8px);
 }
