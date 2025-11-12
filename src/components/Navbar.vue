@@ -95,6 +95,14 @@
               </div>
             </router-link>
           </li>
+          <li class="nav-item">
+            <router-link class="nav-link-modern" to="/servicios" @click="closeMobileMenu">
+              <div class="nav-link-content">
+                <i class="fas fa-tools"></i>
+                <span>Tools</span>
+              </div>
+            </router-link>
+          </li>
         </ul>
 
         <!-- User Menu -->

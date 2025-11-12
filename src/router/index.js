@@ -39,7 +39,14 @@ const routes = [
     name: 'Horario',
     component: Horario,
     meta: { requiresAuth: true }
-  }
+  },
+
+  {
+  path: '/servicios',
+  name: 'Servicios',
+  component: () => import('../views/Servicios.vue'),
+  meta: { requiresAuth: true }
+}
 ]
 
 const router = createRouter({
