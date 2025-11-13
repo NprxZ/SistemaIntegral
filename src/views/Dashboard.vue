@@ -331,6 +331,41 @@
                   </div>
                 </router-link>
               </div>
+
+
+              <div class="col-lg-4 col-md-6">
+                <router-link to="/justificaciones" class="access-card-modern">
+                  <div class="access-bg"></div>
+                  <div class="access-content">
+                    <div class="access-icon-modern">
+                      <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h4 class="access-title">Control de asistencias</h4>
+                    <p class="access-description">Apartado de sistencias y justificantes.</p>
+                    <div class="access-arrow">
+                      <i class="fas fa-arrow-right"></i>
+                    </div>
+                  </div>
+                </router-link>
+              </div>
+
+              <div class="col-lg-4 col-md-6">
+                <router-link to="/servicios" class="access-card-modern">
+                  <div class="access-bg"></div>
+                  <div class="access-content">
+                    <div class="access-icon-modern">
+                      <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h4 class="access-title">Herramientas</h4>
+                    <p class="access-description">Apartado de herramientas funcionales.</p>
+                    <div class="access-arrow">
+                      <i class="fas fa-arrow-right"></i>
+                    </div>
+                  </div>
+                </router-link>
+              </div>
+
+
             </div>
           </div>
         </div>

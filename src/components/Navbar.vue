@@ -96,10 +96,10 @@
             </router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link-modern" to="/servicios" @click="closeMobileMenu">
+            <router-link class="nav-link-modern" to="/justificaciones" @click="closeMobileMenu">
               <div class="nav-link-content">
                 <i class="fas fa-tools"></i>
-                <span>Tools</span>
+                <span>C.Asistencias</span>
               </div>
             </router-link>
           </li>

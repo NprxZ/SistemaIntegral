@@ -1421,4 +1421,3 @@ export default {
   animation: pulse 0.6s ease-in-out;
 }
 </style>
-

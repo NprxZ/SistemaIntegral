@@ -8,7 +8,7 @@
             <i class="fas fa-tools"></i>
           </div>
           <div class="header-text">
-            <h1 class="page-title">Servicios/Tools</h1>
+            <h1 class="page-title">Herramientas</h1>
             <p class="page-subtitle">
               <i class="fas fa-info-circle me-2"></i>
               Herramientas y servicios útiles para estudiantes
@@ -69,59 +69,88 @@
           </div>
         </div>
 
-        <!-- Tipo de Cambio -->
+        <!-- Planificador de Estudio -->
         <div class="col-lg-6">
           <div class="service-card exchange-card">
             <div class="card-header-service">
-              <i class="fas fa-dollar-sign me-2"></i>
-              <span>Tipo de Cambio</span>
-              <button @click="fetchExchange" class="btn-refresh" :disabled="loadingExchange">
-                <i class="fas fa-sync-alt" :class="{ 'fa-spin': loadingExchange }"></i>
+              <i class="fas fa-clock me-2"></i>
+              <span>Planificador de Estudio</span>
+              <button @click="generateStudyPlan" class="btn-refresh" :disabled="loadingStudyPlan">
+                <i class="fas fa-sync-alt" :class="{ 'fa-spin': loadingStudyPlan }"></i>
               </button>
             </div>
             <div class="card-body-service">
-              <div v-if="loadingExchange" class="loading-state">
+              <div v-if="loadingStudyPlan" class="loading-state">
                 <i class="fas fa-spinner fa-spin"></i>
-                <p>Cargando tipo de cambio...</p>
+                <p>Generando plan de estudio...</p>
               </div>
-              <div v-else-if="exchangeError" class="error-state">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>{{ exchangeError }}</p>
-              </div>
-              <div v-else-if="exchange" class="exchange-content">
+              <div v-else class="exchange-content">
                 <div class="exchange-main">
-                  <div class="exchange-flag">🇺🇸</div>
+                  <div class="exchange-flag">⏰</div>
                   <div class="exchange-rate">
-                    <span class="rate-value">{{ exchange.rates.MXN.toFixed(2) }}</span>
-                    <span class="rate-currency">MXN</span>
+                    <span class="rate-value">{{ studyHoursTotal }}</span>
+                    <span class="rate-currency">Horas</span>
                   </div>
-                  <div class="exchange-flag">🇲🇽</div>
+                  <div class="exchange-flag">📖</div>
                 </div>
                 <div class="exchange-description">
-                  1 USD = {{ exchange.rates.MXN.toFixed(2) }} MXN
+                  Plan de estudio semanal recomendado
                 </div>
                 <div class="exchange-converter">
                   <div class="converter-input">
-                    <label>USD</label>
+                    <label>Horas disponibles/día</label>
                     <input 
                       type="number" 
-                      v-model.number="usdAmount" 
-                      @input="convertCurrency"
-                      placeholder="0.00"
+                      v-model.number="hoursPerDay" 
+                      @input="generateStudyPlan"
+                      placeholder="2-8"
+                      min="1"
+                      max="12"
                       class="form-control-custom"
                     />
                   </div>
                   <div class="converter-arrow">
-                    <i class="fas fa-exchange-alt"></i>
+                    <i class="fas fa-arrow-right"></i>
                   </div>
                   <div class="converter-input">
-                    <label>MXN</label>
+                    <label>Días a la semana</label>
                     <input 
                       type="number" 
-                      v-model.number="mxnAmount" 
-                      readonly
+                      v-model.number="daysPerWeek" 
+                      @input="generateStudyPlan"
+                      min="1"
+                      max="7"
                       class="form-control-custom"
                     />
+                  </div>
+                </div>
+
+                <!-- Plan Generado -->
+                <div v-if="studyPlan.length > 0" class="mt-3">
+                  <div class="study-plan-container">
+                    <h6 class="text-center mb-3 study-plan-title">
+                      <i class="fas fa-lightbulb me-2"></i>Tu Plan Sugerido
+                    </h6>
+                    <div class="study-plan-list">
+                      <div v-for="(day, index) in studyPlan" :key="index" class="study-day-item">
+                        <div class="day-header">
+                          <i class="fas fa-calendar-day me-2"></i>
+                          <strong>{{ day.day }}</strong>
+                        </div>
+                        <div class="day-schedule">
+                          <div v-for="(session, idx) in day.sessions" :key="idx" class="study-session">
+                            <span class="session-time">{{ session.time }}</span>
+                            <span class="session-activity">{{ session.activity }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="study-tips mt-3">
+                    <p class="tip-text">
+                      <i class="fas fa-info-circle me-2"></i>
+                      {{ currentTip }}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -184,42 +213,7 @@
           </div>
         </div>
 
-        <!-- Noticias de Tecnología -->
-        <div class="col-lg-6">
-          <div class="service-card news-card">
-            <div class="card-header-service">
-              <i class="fas fa-newspaper me-2"></i>
-              <span>Noticias de Tecnología</span>
-              <button @click="fetchNews" class="btn-refresh" :disabled="loadingNews">
-                <i class="fas fa-sync-alt" :class="{ 'fa-spin': loadingNews }"></i>
-              </button>
-            </div>
-            <div class="card-body-service">
-              <div v-if="loadingNews" class="loading-state">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p>Cargando noticias...</p>
-              </div>
-              <div v-else-if="newsError" class="error-state">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>{{ newsError }}</p>
-              </div>
-              <div v-else-if="news && news.length > 0" class="news-content">
-                <div v-for="(article, index) in news.slice(0, 5)" :key="index" class="news-item">
-                  <div class="news-badge">
-                    <i class="fas fa-bolt"></i>
-                  </div>
-                  <div class="news-text">
-                    <h4 class="news-title">{{ article.title }}</h4>
-                    <p class="news-description">{{ article.description || 'Sin descripción disponible' }}</p>
-                    <a :href="article.url" target="_blank" class="news-link">
-                      Leer más <i class="fas fa-external-link-alt"></i>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+
 
         <!-- Frases Motivacionales -->
         <div class="col-12">
@@ -256,7 +250,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 export default {
   name: 'Servicios',
@@ -266,12 +260,21 @@ export default {
     const loadingWeather = ref(false);
     const weatherError = ref('');
 
-    // Exchange
-    const exchange = ref(null);
-    const loadingExchange = ref(false);
-    const exchangeError = ref('');
-    const usdAmount = ref(1);
-    const mxnAmount = ref(0);
+    // Study Planner
+    const hoursPerDay = ref(3);
+    const daysPerWeek = ref(5);
+    const studyPlan = ref([]);
+    const loadingStudyPlan = ref(false);
+    const currentTip = ref('');
+    const studyTips = [
+      'Toma descansos de 10 minutos cada hora para mejor retención',
+      'Estudia en bloques de 25-50 minutos (Técnica Pomodoro)',
+      'Repasa lo aprendido antes de dormir para mejor memoria',
+      'Alterna entre materias difíciles y fáciles',
+      'Estudia en un lugar tranquilo y bien iluminado',
+      'Mantén tu celular en modo silencio durante el estudio',
+      'Hidrátate constantemente mientras estudias'
+    ];
 
     // Calculator
     const grades = ref([]);
@@ -286,12 +289,15 @@ export default {
     const quote = ref(null);
     const loadingQuote = ref(false);
 
+    const studyHoursTotal = computed(() => {
+      if (!hoursPerDay.value || !daysPerWeek.value) return '0';
+      return (hoursPerDay.value * daysPerWeek.value).toFixed(1);
+    });
+
     const fetchWeather = async () => {
       loadingWeather.value = true;
       weatherError.value = '';
       try {
-        // Usar Open-Meteo API (gratuita, sin necesidad de API key)
-        // Primero obtenemos las coordenadas de Celaya
         const lat = 20.5289;
         const lon = -100.8157;
         
@@ -302,7 +308,6 @@ export default {
         if (!response.ok) throw new Error('Error al obtener el clima');
         const data = await response.json();
         
-        // Adaptar la respuesta al formato que espera el template
         weather.value = {
           main: {
             temp: data.current.temperature_2m,
@@ -325,7 +330,6 @@ export default {
       }
     };
 
-    // Función auxiliar para convertir códigos WMO a condiciones
     const getWeatherCondition = (code) => {
       if (code === 0) return 'Clear';
       if (code <= 3) return 'Clouds';
@@ -337,7 +341,6 @@ export default {
       return 'Clouds';
     };
 
-    // Función auxiliar para obtener descripciones en español
     const getWeatherDescription = (code) => {
       const descriptions = {
         0: 'Despejado',
@@ -365,34 +368,60 @@ export default {
       return descriptions[code] || 'Condiciones variables';
     };
 
-    const fetchExchange = async () => {
-      loadingExchange.value = true;
-      exchangeError.value = '';
-      try {
-        const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-        if (!response.ok) throw new Error('Error al obtener tipo de cambio');
-        exchange.value = await response.json();
-        convertCurrency();
-      } catch (err) {
-        exchangeError.value = 'No se pudo cargar el tipo de cambio.';
-        console.error(err);
-      } finally {
-        loadingExchange.value = false;
-      }
+    const generateStudyPlan = () => {
+      loadingStudyPlan.value = true;
+      
+      setTimeout(() => {
+        const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+        const activities = [
+          'Matemáticas/Lógica',
+          'Lectura y Comprensión',
+          'Práctica de Problemas',
+          'Repaso General',
+          'Proyectos/Tareas',
+          'Estudio en Grupo',
+          'Preparación Exámenes',
+          'Programación/Labs',
+          'Idiomas/Inglés',
+          'Investigación'
+        ];
+        
+        studyPlan.value = [];
+        
+        for (let i = 0; i < daysPerWeek.value; i++) {
+          const sessions = [];
+          const sessionsPerDay = Math.max(1, Math.floor(hoursPerDay.value / 1.5));
+          
+          for (let j = 0; j < sessionsPerDay; j++) {
+            const startHour = 14 + (j * 2);
+            const endHour = startHour + 1;
+            sessions.push({
+              time: `${startHour}:00 - ${endHour}:00`,
+              activity: activities[Math.floor(Math.random() * activities.length)]
+            });
+          }
+          
+          studyPlan.value.push({
+            day: days[i],
+            sessions: sessions
+          });
+        }
+        
+        currentTip.value = studyTips[Math.floor(Math.random() * studyTips.length)];
+        loadingStudyPlan.value = false;
+      }, 500);
     };
 
     const fetchNews = async () => {
       loadingNews.value = true;
       newsError.value = '';
       try {
-        // Usando una API pública alternativa sin requerir API key
         const response = await fetch(
           'https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty'
         );
         if (!response.ok) throw new Error('Error al obtener noticias');
         const storyIds = await response.json();
         
-        // Obtener los primeros 5 artículos
         const articles = await Promise.all(
           storyIds.slice(0, 5).map(async (id) => {
             const itemResponse = await fetch(
@@ -445,12 +474,6 @@ export default {
       return icons[condition] || 'fas fa-cloud-sun';
     };
 
-    const convertCurrency = () => {
-      if (exchange.value && usdAmount.value) {
-        mxnAmount.value = (usdAmount.value * exchange.value.rates.MXN).toFixed(2);
-      }
-    };
-
     const addGrade = () => {
       if (newGrade.value && newGrade.value >= 0 && newGrade.value <= 100) {
         grades.value.push(newGrade.value);
@@ -474,7 +497,7 @@ export default {
 
     onMounted(() => {
       fetchWeather();
-      fetchExchange();
+      generateStudyPlan();
       fetchNews();
       fetchQuote();
     });
@@ -487,13 +510,13 @@ export default {
       getWeatherIcon,
       getWeatherCondition,
       getWeatherDescription,
-      exchange,
-      loadingExchange,
-      exchangeError,
-      fetchExchange,
-      usdAmount,
-      mxnAmount,
-      convertCurrency,
+      hoursPerDay,
+      daysPerWeek,
+      studyPlan,
+      loadingStudyPlan,
+      currentTip,
+      studyHoursTotal,
+      generateStudyPlan,
       grades,
       newGrade,
       addGrade,
@@ -710,7 +733,7 @@ export default {
   font-size: 1.2rem;
 }
 
-/* Exchange Card */
+/* Exchange Card / Study Planner */
 .exchange-content {
   text-align: center;
 }
@@ -786,6 +809,111 @@ export default {
 .converter-arrow i {
   color: white;
   font-size: 1.2rem;
+}
+
+/* Study Planner Styles */
+.study-plan-container {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 15px;
+  border-radius: 12px;
+  color: white;
+}
+
+.study-plan-title {
+  color: white;
+  font-weight: 600;
+  margin: 0;
+}
+
+.study-plan-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.study-day-item {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+}
+
+.study-day-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(5px);
+}
+
+.day-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.day-schedule {
+  padding-left: 10px;
+}
+
+.study-session {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.study-session:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.session-time {
+  font-weight: 600;
+  color: #fbbf24;
+}
+
+.session-activity {
+  text-align: right;
+  flex: 1;
+  margin-left: 10px;
+}
+
+.study-tips {
+  background: #f0f9ff;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+}
+
+.tip-text {
+  margin: 0;
+  color: #1e40af;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Scrollbar para study plan */
+.study-plan-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.study-plan-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.study-plan-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
+.study-plan-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 /* Calculator Card */
@@ -1187,6 +1315,21 @@ export default {
 
   .quote-author {
     font-size: 1rem;
+  }
+
+  .study-plan-container {
+    padding: 12px;
+  }
+  
+  .study-session {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .session-activity {
+    text-align: left;
+    margin-left: 0;
   }
 }
 
