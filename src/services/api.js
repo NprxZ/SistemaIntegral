@@ -4,7 +4,7 @@ import axios from 'axios';
 // Configuración de la URL base según el entorno
 const API_BASE_URL = import.meta.env.DEV
   ? '/api'  // En desarrollo usa el proxy
-  : 'https://cetech.roque.tecnm.mx/api'; // En producción usa la API real
+  : '/api'; // En producción usa la API real
 
 
 // Crear instancia de axios
